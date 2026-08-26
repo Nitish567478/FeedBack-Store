@@ -1,7 +1,11 @@
 import axios from 'axios';
-import { getGuestToken } from './guestToken';
+import { getGuestToken, clearCachedGuestToken } from './guestToken';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL ||
+  (import.meta.env.PROD
+    ? 'https://backend-roxiler-assignments.onrender.com/api'
+    : 'http://localhost:5000/api');
 
 const axiosInstance = axios.create({
   baseURL: API_BASE_URL,
@@ -32,10 +36,15 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response && error.response.status === 401) {
+    if (error.response && (error.response.status === 401 || error.response.status === 403)) {
       const userToken = localStorage.getItem('feedback_store_token');
       const isAuthPath = error.config?.url?.includes('/auth/login') || error.config?.url?.includes('/auth/signup');
       
+      // If error occurred without active user token, invalidate guest token
+      if (!userToken) {
+        clearCachedGuestToken();
+      }
+
       // If unauthorized on protected calls with a previously active USER token, clear token & redirect
       if (userToken && !isAuthPath) {
         localStorage.removeItem('feedback_store_token');
