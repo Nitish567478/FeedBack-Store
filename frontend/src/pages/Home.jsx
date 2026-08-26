@@ -24,53 +24,6 @@ export const Home = () => {
   const { user, isAuthenticated, login } = useAuth();
   const navigate = useNavigate();
 
-  const [stats, setStats] = useState({
-    totalStores: 2,
-    totalRatings: 2,
-    totalUsers: 8
-  });
-
-  useEffect(() => {
-    const fetchPublicStats = async () => {
-      try {
-        const res = await axiosInstance.get('/user/stores');
-        if (res && res.data) {
-          const list = res.data.stores || (Array.isArray(res.data) ? res.data : []);
-          if (list.length > 0) {
-            const storeCount = list.length;
-            const ratingCount = list.reduce(
-              (acc, s) => acc + (s.ratings_count || (s.avg_rating > 0 ? 1 : 0)),
-              0
-            );
-            setStats((prev) => ({
-              ...prev,
-              totalStores: storeCount,
-              totalRatings: ratingCount
-            }));
-          }
-        }
-      } catch (e) {
-        // Ignored
-      }
-    };
-    fetchPublicStats();
-  }, []);
-
-  // const handleQuickLogin = async (demoEmail, demoPassword) => {
-  //   try {
-  //     const loggedUser = await login(demoEmail, demoPassword);
-  //     if (loggedUser.role === 'ADMIN') {
-  //       navigate('/admin/dashboard');
-  //     } else if (loggedUser.role === 'STORE_OWNER') {
-  //       navigate('/owner/dashboard');
-  //     } else {
-  //       navigate('/stores');
-  //     }
-  //   } catch (err) {
-  //     console.error('Quick login error:', err);
-  //   }
-  // };
-
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 animate-fade-in selection:bg-indigo-500 selection:text-white">
       {/* Hero Section */}
@@ -150,12 +103,12 @@ export const Home = () => {
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
             <div className="p-3">
-              <p className="text-3xl font-black text-white font-mono">{stats.totalStores}</p>
-              <p className="text-xs text-slate-400 mt-1 uppercase font-semibold tracking-wider">Active Stores in DB</p>
+              <p className="text-3xl font-black text-white font-mono">100+</p>
+              <p className="text-xs text-slate-400 mt-1 uppercase font-semibold tracking-wider">Active Stores</p>
             </div>
             <div className="p-3">
-              <p className="text-3xl font-black text-white font-mono">{stats.totalRatings}</p>
-              <p className="text-xs text-slate-400 mt-1 uppercase font-semibold tracking-wider">Verified Ratings in DB</p>
+              <p className="text-3xl font-black text-white font-mono">600+</p>
+              <p className="text-xs text-slate-400 mt-1 uppercase font-semibold tracking-wider">Verified Ratings</p>
             </div>
             <div className="p-3">
               <p className="text-3xl font-black text-white font-mono">1 to 5 ★</p>
