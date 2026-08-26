@@ -1,0 +1,19 @@
+{
+  "name": "feedback-store-platform",
+  "version": "1.0.0",
+  "description": "Store Rating and Directory Platform with Role-Based Access Control",
+  "scripts": {
+    "install:backend": "cd backend && npm install",
+    "install:frontend": "cd frontend && npm install",
+    "install:all": "npm run install:backend && npm run install:frontend",
+    "setup:db": "cd backend && npm run setup",
+    "seed": "cd backend && npm run prisma:seed",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build",
+    "start": "cd backend && npm start"
+  },
+  "keywords": ["express", "react", "prisma", "postgresql", "rbac", "rating-app"],
+  "author": "",
+  "license": "ISC"
+}
