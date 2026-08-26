@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import axiosInstance from '../api/axiosInstance';
 import { useAuth } from '../context/AuthContext';
 import { StarRating } from '../components/StarRating';
@@ -17,11 +17,16 @@ import {
   RefreshCw,
   LogIn,
   UserCheck,
-  MessageSquarePlus
+  MessageSquarePlus,
+  BadgeCheck
 } from 'lucide-react';
 
 export const UserStoreList = () => {
   const { isAuthenticated, user } = useAuth();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const newStoreCreated = searchParams.get('new_store');
+
   const [stores, setStores] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -207,6 +212,30 @@ export const UserStoreList = () => {
         </div>
       </div>
 
+      {/* Newly Created Store Celebration Banner */}
+      {newStoreCreated && (
+        <div className="mb-6 p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xl animate-fade-in">
+          <div className="flex items-center gap-3">
+            <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0" />
+            <div>
+              <p className="font-bold text-sm text-emerald-200">🎉 Store Registered Successfully!</p>
+              <p className="text-xs text-emerald-300 mt-0.5">
+                "{decodeURIComponent(newStoreCreated)}" has been created and is now live in the store directory below.
+              </p>
+            </div>
+          </div>
+          {isAuthenticated && user?.role === 'STORE_OWNER' && (
+            <Link
+              to="/owner/dashboard"
+              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 transition self-start sm:self-auto shadow-lg shadow-emerald-600/20"
+            >
+              <Store className="w-3.5 h-3.5" />
+              <span>Go to My Dashboard</span>
+            </Link>
+          )}
+        </div>
+      )}
+
       {/* Connection error banner (only if critical failure) */}
       {error && (
         <div className="mb-6 p-5 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-300 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xl animate-fade-in">
@@ -324,9 +353,17 @@ export const UserStoreList = () => {
                         <Store className="w-5 h-5" />
                       </div>
                       <div>
-                        <h3 className="text-base font-bold text-white leading-tight">
-                          {store.name}
-                        </h3>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h3 className="text-base font-bold text-white leading-tight">
+                            {store.name}
+                          </h3>
+                          {user && (user.email === store.email || user.store?.id === store.id || user.store?.name === store.name) && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                              <BadgeCheck className="w-3 h-3" />
+                              Your Store
+                            </span>
+                          )}
+                        </div>
                         <p className="text-[11px] text-slate-400 font-mono mt-0.5">
                           {store.email}
                         </p>

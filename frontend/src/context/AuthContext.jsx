@@ -121,6 +121,42 @@ export const AuthProvider = ({ children }) => {
     const receivedToken = res.data.token;
     const receivedUser = formatUser(res.data.user);
 
+    // If registering as a STORE_OWNER and store details are provided:
+    // Create the store immediately so it is instantly available in the public catalog and owner dashboard
+    const isOwner = data.accountType === 'STORE_OWNER' || mappedRole === 'owner' || mappedRole === 'STORE_OWNER';
+    if (isOwner && data.storeName && data.storeName.trim()) {
+      try {
+        const storePayload = {
+          name: data.storeName.trim(),
+          email: (data.storeEmail || data.email).trim(),
+          address: (data.storeAddress || data.address || 'Store Location').trim(),
+          owner_id: receivedUser.id,
+          ownerId: receivedUser.id
+        };
+        const storeRes = await axiosInstance.post('/admin/stores', storePayload, {
+          headers: { Authorization: `Bearer ${receivedToken}` }
+        });
+        if (storeRes.data?.store) {
+          receivedUser.store = storeRes.data.store;
+        }
+      } catch (storeErr) {
+        try {
+          const ownerStoreRes = await axiosInstance.post('/owner/store', {
+            name: data.storeName.trim(),
+            email: (data.storeEmail || data.email).trim(),
+            address: (data.storeAddress || data.address || 'Store Location').trim()
+          }, {
+            headers: { Authorization: `Bearer ${receivedToken}` }
+          });
+          if (ownerStoreRes.data?.store) {
+            receivedUser.store = ownerStoreRes.data.store;
+          }
+        } catch (e2) {
+          console.warn('Store creation fallback note:', e2.message);
+        }
+      }
+    }
+
     localStorage.setItem('feedback_store_token', receivedToken);
     localStorage.setItem('feedback_store_user', JSON.stringify(receivedUser));
 

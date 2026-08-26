@@ -82,7 +82,7 @@ export const Register = () => {
 
       const createdUser = await signup(payload);
       if (createdUser.role === 'STORE_OWNER') {
-        navigate('/owner/dashboard');
+        navigate(`/stores?new_store=${encodeURIComponent(formData.storeName || 'Your Store')}`);
       } else {
         navigate('/stores');
       }

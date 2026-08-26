@@ -19,7 +19,7 @@ const generateToken = (user) => {
 };
 
 export const signup = async (req, res) => {
-  const { name, email, password, address, accountType = 'NORMAL_USER', storeName, storeEmail, storeAddress } = req.body;
+  const { name, email, password, address, accountType = 'NORMAL_USER', role, storeName, storeEmail, storeAddress } = req.body;
 
   try {
     const existingUser = await prisma.user.findUnique({
@@ -30,13 +30,16 @@ export const signup = async (req, res) => {
       return res.status(409).json({ message: 'A user with this email already exists.' });
     }
 
-    const isOwner = accountType === 'STORE_OWNER';
+    const isOwner =
+      accountType === 'STORE_OWNER' ||
+      accountType === 'owner' ||
+      role === 'owner' ||
+      role === 'STORE_OWNER' ||
+      Boolean(storeName && storeName.trim());
 
     if (isOwner) {
-      if (!storeName || !storeName.trim()) {
-        return res.status(400).json({ message: 'Store Name is required for Store Owner registration.' });
-      }
-      const sEmail = (storeEmail || email).toLowerCase();
+      const resolvedStoreName = storeName && storeName.trim() ? storeName.trim() : `${name}'s Store`;
+      const sEmail = (storeEmail || email).toLowerCase().trim();
       const existingStore = await prisma.store.findUnique({
         where: { email: sEmail }
       });
@@ -58,7 +61,7 @@ export const signup = async (req, res) => {
           role: 'STORE_OWNER',
           store: {
             create: {
-              name: storeName.trim(),
+              name: resolvedStoreName,
               email: (storeEmail || email).toLowerCase(),
               address: storeAddress && storeAddress.trim() ? storeAddress.trim() : (address ? address.trim() : '')
             }
