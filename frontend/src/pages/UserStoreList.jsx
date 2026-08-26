@@ -4,6 +4,7 @@ import axiosInstance from '../api/axiosInstance';
 import { useAuth } from '../context/AuthContext';
 import { StarRating } from '../components/StarRating';
 import { AuthModal } from '../components/AuthModal';
+import { ensureLiveDatabaseSeeded } from '../api/seedSync';
 import {
   Store,
   Star,
@@ -68,7 +69,21 @@ export const UserStoreList = () => {
         }
       }
 
-      const rawStores = res?.data?.stores || (Array.isArray(res?.data) ? res.data : []);
+      let rawStores = res?.data?.stores || (Array.isArray(res?.data) ? res.data : []);
+
+      // If database was empty / reset and user didn't enter a specific search, auto-heal
+      if (rawStores.length === 0 && !search.trim()) {
+        const seeded = await ensureLiveDatabaseSeeded();
+        if (seeded) {
+          try {
+            res = await axiosInstance.get('/user/stores', { params });
+            rawStores = res?.data?.stores || (Array.isArray(res?.data) ? res.data : []);
+          } catch (retryE) {
+            // ignore
+          }
+        }
+      }
+
       const mappedStores = rawStores.map((s) => {
         const avg = s.avg_rating !== undefined ? s.avg_rating : (s.overallRating !== undefined ? s.overallRating : (s.averageNumeric || 0));
         const userRate = s.user_rating !== undefined ? s.user_rating : (s.userSubmittedRating !== undefined ? s.userSubmittedRating : null);

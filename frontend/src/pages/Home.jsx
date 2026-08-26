@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import axiosInstance from '../api/axiosInstance';
+import { ensureLiveDatabaseSeeded } from '../api/seedSync';
 import {
   Store,
   ShieldCheck,
@@ -21,8 +21,12 @@ import {
 } from 'lucide-react';
 
 export const Home = () => {
-  const { user, isAuthenticated, login } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    ensureLiveDatabaseSeeded().catch(() => {});
+  }, []);
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 animate-fade-in selection:bg-indigo-500 selection:text-white">
