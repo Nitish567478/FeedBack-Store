@@ -48,6 +48,7 @@ export const Login = () => {
   const handleQuickLogin = (demoEmail, demoPassword) => {
     setEmail(demoEmail);
     setPassword(demoPassword);
+    setError('');
   };
 
   return (
@@ -137,6 +138,44 @@ export const Login = () => {
                 )}
               </button>
             </form>
+
+            {/* Quick Demo Credentials */}
+            <div className="mt-6 pt-5 border-t border-slate-800">
+              <div className="flex items-center gap-1.5 mb-2.5">
+                <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  1-Click Demo Accounts
+                </span>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleQuickLogin('admin@feedbackstore.com', 'Admin@12345')}
+                  className="px-2 py-2.5 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 text-purple-300 text-xs font-semibold flex flex-col items-center gap-1 transition cursor-pointer"
+                >
+                  <ShieldCheck className="w-4 h-4 text-purple-400" />
+                  <span>Admin</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleQuickLogin('tabifaw501@bocably.com', 'Owner@12345')}
+                  className="px-2 py-2.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-xs font-semibold flex flex-col items-center gap-1 transition cursor-pointer"
+                >
+                  <Store className="w-4 h-4 text-emerald-400" />
+                  <span>Store Owner</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleQuickLogin('alexander.smith@example.com', 'User@12345')}
+                  className="px-2 py-2.5 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-300 text-xs font-semibold flex flex-col items-center gap-1 transition cursor-pointer"
+                >
+                  <User className="w-4 h-4 text-blue-400" />
+                  <span>User</span>
+                </button>
+              </div>
+            </div>
 
             {/* Footer signup link */}
             <div className="mt-5 text-center text-xs text-slate-400">

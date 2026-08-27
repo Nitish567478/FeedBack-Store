@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axiosInstance from '../api/axiosInstance';
-import { ensureLiveDatabaseSeeded } from '../api/seedSync';
 
 const AuthContext = createContext(null);
 
@@ -26,12 +25,9 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem('feedback_store_token'));
   const [loading, setLoading] = useState(true);
 
-  // Initialize auth state and guarantee database readiness
+  // Initialize auth state
   useEffect(() => {
     const initAuth = async () => {
-      // Warm up / sync database in background
-      ensureLiveDatabaseSeeded().catch(() => {});
-
       const storedToken = localStorage.getItem('feedback_store_token');
       const storedUser = localStorage.getItem('feedback_store_user');
 
@@ -66,45 +62,18 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (email, password) => {
-    try {
-      const res = await axiosInstance.post('/auth/login', { email, password });
-      const receivedToken = res.data.token;
-      const receivedUser = formatUser(res.data.user);
+    const cleanEmail = email ? email.trim().toLowerCase() : '';
+    const res = await axiosInstance.post('/auth/login', { email: cleanEmail, password });
+    const receivedToken = res.data.token;
+    const receivedUser = formatUser(res.data.user);
 
-      localStorage.setItem('feedback_store_token', receivedToken);
-      localStorage.setItem('feedback_store_user', JSON.stringify(receivedUser));
+    localStorage.setItem('feedback_store_token', receivedToken);
+    localStorage.setItem('feedback_store_user', JSON.stringify(receivedUser));
 
-      setToken(receivedToken);
-      setUser(receivedUser);
+    setToken(receivedToken);
+    setUser(receivedUser);
 
-      return receivedUser;
-    } catch (loginErr) {
-      // If login returned 400/401, auto-provision and retry once if it's admin or demo account
-      if (loginErr.response?.status === 400 || loginErr.response?.status === 401) {
-        const isKnownPreset =
-          email.toLowerCase() === 'admin@feedbackstore.com' ||
-          email.toLowerCase().includes('owner') ||
-          email.toLowerCase().includes('feedbackstore') ||
-          email.toLowerCase().includes('example.com') ||
-          email.toLowerCase().includes('bocably.com');
-
-        if (isKnownPreset) {
-          await ensureLiveDatabaseSeeded();
-          const retryRes = await axiosInstance.post('/auth/login', { email, password });
-          const receivedToken = retryRes.data.token;
-          const receivedUser = formatUser(retryRes.data.user);
-
-          localStorage.setItem('feedback_store_token', receivedToken);
-          localStorage.setItem('feedback_store_user', JSON.stringify(receivedUser));
-
-          setToken(receivedToken);
-          setUser(receivedUser);
-
-          return receivedUser;
-        }
-      }
-      throw loginErr;
-    }
+    return receivedUser;
   };
 
   const signup = async (data) => {
